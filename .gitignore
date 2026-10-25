@@ -1,0 +1,6 @@
+.env
+.env.local
+secrets/
+messages/
+recordings/
+transcripts/

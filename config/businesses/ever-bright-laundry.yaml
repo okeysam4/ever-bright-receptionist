@@ -1,0 +1,121 @@
+# config/businesses/ever-bright-laundry.yaml
+# Items marked TODO are placeholders: confirm or replace them before going live.
+
+business:
+  name: "Ever Bright Laundry"
+  type: "laundry and dry-cleaning service"
+  timezone: "Africa/Lagos"
+
+voice:
+  voice_id: "marin"
+  model: "gpt-realtime-2.1"
+  auth:
+    type: "api_key"              # reads OPENAI_API_KEY from .env
+  idle:
+    silence_hangup_enabled: true
+    max_call_duration_seconds: 600
+
+languages:
+  primary: "en"
+  allowed: ["en"]
+
+greeting: "Thank you for calling Ever Bright Laundry. How can I help you today?"
+
+personality: |
+  You are a friendly, professional receptionist for Ever Bright Laundry,
+  a laundry service on Eke Market Road, Afikpo, Nigeria. Speak clearly and
+  keep answers short and warm. Callers usually want to know about
+  services, pick-up and delivery, how long laundry takes, or the status of
+  an order. Never invent prices, turnaround times or order status. If you
+  do not have the answer, offer to take the caller's name, phone number
+  and message so the owner can call back.
+
+# TODO: confirm real opening hours
+hours:
+  monday:    { open: "08:00", close: "18:00" }
+  tuesday:   { open: "08:00", close: "18:00" }
+  wednesday: { open: "08:00", close: "18:00" }
+  thursday:  { open: "08:00", close: "18:00" }
+  friday:    { open: "08:00", close: "18:00" }
+  saturday:  { open: "09:00", close: "16:00" }
+  sunday:    closed
+
+after_hours_message: |
+  Ever Bright Laundry is closed right now. I can take your name, number
+  and message, and the team will call you back when we open.
+
+# TODO: replace with the number calls should be transferred to (E.164 format)
+routing:
+  - name: "Owner"
+    number: "+234XXXXXXXXXX"
+    description: "General enquiries, pricing, order issues and complaints"
+
+# TODO: add real prices and turnaround times, then the receptionist can quote them
+faqs:
+  - question: "Where are you located?"
+    answer: "We are on Eke Market Road, Afikpo, Ebonyi State."
+  - question: "What services do you offer?"
+    answer: "We wash, dry and iron clothes and other household laundry. Please ask the owner about dry-cleaning or special items."
+  - question: "Do you offer pick-up and delivery?"
+    answer: "I can take your name, address and phone number, and the owner will call you back to arrange pick-up or delivery."
+  - question: "How much does it cost?"
+    answer: "Prices depend on the items and the amount of laundry. I can take your details and the owner will call you with a quote."
+  - question: "How long does laundry take?"
+    answer: "Turnaround depends on the size of the order. I can take your details and the owner will confirm the exact time with you."
+
+messages:
+  channels:
+    - type: "file"
+      file_path: "./messages/ever-bright-laundry/"
+    - type: "email"
+      to: ["you@example.com"]
+      include_transcript: true
+      include_recording_link: false
+
+transcripts:
+  enabled: true
+  storage:
+    type: "local"
+    path: "./transcripts/ever-bright-laundry/"
+  formats: ["json", "markdown"]
+
+# Email alerts via Gmail. Needs SMTP_USERNAME (your Gmail address) and
+# SMTP_PASSWORD (a Gmail *app password*, not your normal password) in .env.
+email:
+  from: "you@example.com"
+  sender:
+    type: "smtp"
+    smtp:
+      host: "smtp.gmail.com"
+      port: 587
+      username: ${SMTP_USERNAME}
+      password: ${SMTP_PASSWORD}
+      use_tls: true
+  triggers:
+    on_message: true      # email when a caller leaves a message
+    on_call_end: false    # set true for a summary email after every call
+    on_booking: false     # set true (with calendar.enabled: true) to email on each booking
+
+# Pick-up slot booking on Google Calendar. Currently DISABLED because the agent
+# refuses to start with enabled: true until the OAuth token file exists.
+# To turn on (personal gmail.com calendar uses OAuth):
+#   1. Enable the Google Calendar API and create an OAuth client in Google Cloud
+#      (see documentation/google-calendar-setup.md, Path B)
+#   2. Run: python -m receptionist.booking setup ever-bright-laundry
+#   3. Change enabled to true
+calendar:
+  enabled: false
+  calendar_id: "primary"
+  auth:
+    type: "oauth"
+    oauth_token_file: "./secrets/ever-bright-laundry/google-calendar-oauth.json"
+  appointment_duration_minutes: 15   # a pick-up/drop-off slot, not a long appointment
+  buffer_minutes: 15
+  buffer_placement: "after"
+  booking_window_days: 14
+  earliest_booking_hours_ahead: 2
+
+retention:
+  recordings_days: 90
+  transcripts_days: 90
+  messages_days: 0
